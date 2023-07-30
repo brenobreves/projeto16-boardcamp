@@ -27,7 +27,24 @@ export async function createRental(req, res){
 }
 
 export async function returnRental(req, res){
-    res.send("returnRental")
+    let {id} = req.params
+    if(isNaN(Number(id)) || id.trim() === "") return res.sendStatus(404)
+    try {
+        const getRental = await db.query(`SELECT * FROM rentals WHERE id=$1;`,[Number(id)])
+        if(getRental.rowCount === 0) return res.sendStatus(404)
+        const rental = getRental.rows[0]
+        if(rental.returnDate !== null) return res.sendStatus(400)
+        const returnDate = dayjs()
+        const daysToReturn = returnDate.diff(rental.rentDate,'d')
+        const delay = daysToReturn - rental.daysRented
+        let delayFee = 0
+        if(delay > 0) delayFee+= delay*(rental.originalPrice/rental.daysRented)
+        const endRental = await db.query(`UPDATE rentals SET "returnDate"=$1 , "delayFee"=$2 WHERE id=$3;`,[returnDate.format('YYYY-MM-DD'), delayFee, id])
+        res.sendStatus(200)
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
+
 }
 
 export async function deleteRental(req, res){
