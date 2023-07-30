@@ -44,9 +44,19 @@ export async function returnRental(req, res){
     } catch (err) {
         res.status(500).send(err.message)
     }
-
 }
 
 export async function deleteRental(req, res){
-    res.send("deleteRental")
+    let {id} = req.params
+    if(isNaN(Number(id)) || id.trim() === "") return res.sendStatus(404)
+    try {
+        const getRental = await db.query(`SELECT * FROM rentals WHERE id=$1;`,[Number(id)])
+        if(getRental.rowCount === 0) return res.sendStatus(404)
+        const rental = getRental.rows[0]
+        if(rental.returnDate === null) return res.sendStatus(400)
+        const rmRental = await db.query(`DELETE FROM rentals WHERE id=$1;`,[id])
+        res.sendStatus(200)
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
 }
