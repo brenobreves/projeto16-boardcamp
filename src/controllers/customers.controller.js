@@ -46,7 +46,7 @@ export async function updateCustomer(req, res){
     try {
         const cpfValidation = await db.query(`SELECT * FROM customers WHERE cpf=$1;`, [cpf])
         if(cpfValidation.rowCount !== 0 && cpfValidation.rows[0].id !== Number(id)) return res.sendStatus(409)
-        const updateCust = await db.query(`UPDATE customers SET name=$1 , phone=$2 , cpf=$3 , birthday=$4 WHERE id=$5`, [name, phone, cpf, formatBday, id])
+        const updateCust = await db.query(`UPDATE customers SET name=$1 , phone=$2 , cpf=$3 , birthday=$4 WHERE id=$5;`, [name, phone, cpf, formatBday, id])
         if(updateCust.rowCount === 0) return res.sendStatus(404)
         res.sendStatus(200) 
     } catch (err) {
