@@ -21,7 +21,15 @@ export async function getCustomersById(req, res){
 }
 
 export async function createCustomer(req, res){
-    res.send("createCustomer")
+    const {name, phone, cpf, birthday} = req.body
+    try {
+        const cpfValidation = await db.query(`SELECT * FROM customers WHERE cpf=$1;`, [cpf])
+        if(cpfValidation.rowCount !== 0) return res.sendStatus(409)
+        const newCust = await db.query(`INSERT INTO customers (name, phone, cpf, birthday) VALUES ($1,$2,$3,$4);`, [name, phone, cpf, birthday])
+        res.sendStatus(201) 
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
 }
 
 export async function updateCustomer(req, res){
