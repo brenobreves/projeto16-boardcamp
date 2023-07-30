@@ -1,5 +1,12 @@
+import {db} from "../database/database.connection.js"
+
 export async function getGames(req, res){
-    res.send("getGames")
+    try {
+        const games = await db.query(`SELECT * FROM games;`)
+        res.send(games.rows)
+    } catch (err) {
+        res.status(500).send(err.message)
+    }
 }
 
 export async function createGame(req, res){
